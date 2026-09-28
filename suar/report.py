@@ -74,6 +74,7 @@ def fetch_board(conn, asof: str | None = None, limit: int = 60):
 
 def render_html(conn, asof: str | None = None, limit: int = 60) -> str:
     asof, rows = fetch_board(conn, asof, limit)
+    asof = asof or today()
     runs = conn.execute("SELECT * FROM v_run_summary").fetchall()
     credits = conn.execute("SELECT COALESCE(SUM(credits),0) FROM api_call").fetchone()[0]
 

@@ -1,0 +1,41 @@
+{
+  "dijalankan": "2026-09-28",
+  "lapis1": {
+    "lapis": 1,
+    "nama": "uji unit rumus",
+    "kasus": 4,
+    "gagal": 0,
+    "detail": []
+  },
+  "lapis2": {
+    "lapis": 2,
+    "nama": "kalibrasi proksi dormansi",
+    "status": "data kurang",
+    "n": 0
+  },
+  "lapis3": {
+    "lapis": 3,
+    "nama": "rekonstruksi status berjalan",
+    "asof": "2026-09-28",
+    "suspensi_non_harga_12bln": 23,
+    "tertangkap": 22,
+    "lolos": 1,
+    "recall": 0.957,
+    "contoh_lolos": [
+      "RSGK"
+    ]
+  },
+  "lapis4": {
+    "lapis": 4,
+    "nama": "ground truth pengumuman BEI",
+    "asof": "2026-09-28",
+    "total_ground_truth": 38,
+    "tercatat_di_api_suspensi": 11,
+    "ditandai_sistem": 37,
+    "recall": 0.974,
+    "tidak_ditandai": [
+      "RSGK"
+    ],
+    "catatan": "Kriteria jumlah pemegang saham (V.1.2) tidak tersedia di API, sehingga sebagian emiten pada daftar ini memang tidak bisa dijelaskan oleh data yang ada. Lihat docs/LIMITATIONS.md."
+  }
+}
