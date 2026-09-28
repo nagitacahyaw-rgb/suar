@@ -1,0 +1,40 @@
+name: suar-weekly
+
+on:
+  schedule:
+    - cron: '30 1 * * 1'        # Senin 08:30 WIB
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+
+      - name: Siapkan database
+        run: python -m suar init
+
+      - name: Snapshot fundamental & presence kuartal
+        env:
+          SECTORS_API_KEY: ${{ secrets.SECTORS_API_KEY }}
+        run: python -m suar --trigger cron weekly
+
+      - name: Validasi berjenjang
+        env:
+          SECTORS_API_KEY: ${{ secrets.SECTORS_API_KEY }}
+        run: python -m suar validate
+
+      - name: Commit hasil
+        run: |
+          git config user.name  'suar-bot'
+          git config user.email 'suar-bot@users.noreply.github.com'
+          git add -f suar.db out/ || true
+          git commit -m "weekly $(date -u +%Y-%m-%d) [skip ci]" || echo "tidak ada perubahan"
+          git push || true

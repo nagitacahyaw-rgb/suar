@@ -1,0 +1,50 @@
+name: suar-daily
+
+on:
+  schedule:
+    - cron: '0 10 * * 1-5'      # 17:00 WIB, setelah bursa tutup
+  workflow_dispatch:
+
+concurrency:
+  group: suar-daily
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+
+      - name: Siapkan database
+        run: python -m suar init
+
+      - name: Jalankan job harian
+        env:
+          SECTORS_API_KEY: ${{ secrets.SECTORS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: |
+          python -m suar --trigger cron daily --send
+
+      - name: Ringkasan eksekusi
+        run: |
+          echo '### Jejak eksekusi' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          sqlite3 -header -column suar.db \
+            "SELECT run_id, job, trigger, started_at, status, rows_written, credits
+             FROM run_log ORDER BY run_id DESC LIMIT 10;" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit hasil
+        run: |
+          git config user.name  'suar-bot'
+          git config user.email 'suar-bot@users.noreply.github.com'
+          git add -f suar.db out/ || true
+          git commit -m "daily $(date -u +%Y-%m-%d) [skip ci]" || echo "tidak ada perubahan"
+          git push || true

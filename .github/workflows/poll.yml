@@ -1,0 +1,51 @@
+name: suar-poll
+
+on:
+  schedule:
+    - cron: '0 1,4,7,10,13 * * 1-5'   # 08:00 / 11:00 / 14:00 / 17:00 / 20:00 WIB
+  workflow_dispatch:
+
+concurrency:
+  group: suar-poll
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+
+      - name: Siapkan database
+        run: python -m suar init
+
+      - name: Cek pengumuman suspensi baru
+        env:
+          SECTORS_API_KEY: ${{ secrets.SECTORS_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: python -m suar --trigger cron poll --send
+
+      - name: Jejak eksekusi
+        run: |
+          echo '### Jejak eksekusi (terjadwal)' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          sqlite3 -header -column suar.db \
+            "SELECT run_id, job, trigger, started_at, status, credits
+             FROM run_log WHERE trigger='cron' ORDER BY run_id DESC LIMIT 15;" \
+            >> $GITHUB_STEP_SUMMARY || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Commit
+        run: |
+          git config user.name  'suar-bot'
+          git config user.email 'suar-bot@users.noreply.github.com'
+          git add -f suar.db out/ || true
+          git commit -m "poll $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]" || echo "tidak ada perubahan"
+          git pull --rebase --autostash || true
+          git push || true
