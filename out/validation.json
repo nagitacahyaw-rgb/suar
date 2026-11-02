@@ -1,5 +1,5 @@
 {
-  "dijalankan": "2026-10-26",
+  "dijalankan": "2026-11-02",
   "lapis1": {
     "lapis": 1,
     "nama": "uji unit rumus",
@@ -16,9 +16,9 @@
   "lapis3": {
     "lapis": 3,
     "nama": "rekonstruksi status berjalan",
-    "asof": "2026-10-26",
-    "suspensi_non_harga_12bln": 12,
-    "tertangkap": 12,
+    "asof": "2026-11-02",
+    "suspensi_non_harga_12bln": 10,
+    "tertangkap": 10,
     "lolos": 0,
     "recall": 1.0,
     "contoh_lolos": []
@@ -26,7 +26,7 @@
   "lapis4": {
     "lapis": 4,
     "nama": "ground truth pengumuman BEI",
-    "asof": "2026-10-26",
+    "asof": "2026-11-02",
     "total_ground_truth": 38,
     "tercatat_di_api_suspensi": 11,
     "ditandai_sistem": 38,
